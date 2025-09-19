@@ -4,9 +4,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Traits\ApiResponse;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class PostController extends Controller
+
+class PostController extends Controller implements HasMiddleware
 {
+    public static function middleware() {
+        return [
+            new Middleware('auth:sanctum', except: ['index', 'show'])
+        ];
+    }
+
     use ApiResponse;
 
     public function index()
@@ -26,7 +35,7 @@ class PostController extends Controller
             'body' => 'required'
         ]);
 
-        $post = Post::create($validatedFields);
+        $post = $request -> user() -> posts() -> create($validatedFields);
         return $this->apiResponse('success', 'Post Created Successfully', $post, 201);
     }
 
