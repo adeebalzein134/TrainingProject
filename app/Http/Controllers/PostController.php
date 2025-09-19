@@ -13,6 +13,9 @@ class PostController extends Controller
     {
         $posts = Post::all();
 
+        if($posts->isEmpty())
+            return $this->apiResponse('success', 'No Posts in database', null);
+
         return $this->apiResponse('success', 'All Posts', $posts);
     }
 
@@ -27,13 +30,24 @@ class PostController extends Controller
         return $this->apiResponse('success', 'Post Created Successfully', $post, 201);
     }
 
-    public function show(Post $post)
+    public function show($id)
     {
-        return $this->apiResponse('success', 'This is Post Number ' .  $post['id'], $post);
+        $post = Post::find($id);
+
+        if (!$post) {
+            return $this->apiResponse('error', 'No Post Found!', null, 404);
+        }
+
+        return $this->apiResponse('success', 'This is Post Number ' . $post->id, $post);
     }
 
-    public function update(Request $request, Post $post)
+    public function update(Request $request, $id)
     {
+        $post = Post::find($id);
+        if (!$post) {
+            return $this->apiResponse('error', 'No Post Found!', null, 404);
+        }
+
         $validatedFields = $request->validate([
             'title' => 'required|max:255',
             'body' => 'required'
@@ -44,8 +58,12 @@ class PostController extends Controller
         return $this->apiResponse('success', 'Post Updated', $post);
     }
 
-    public function destroy(Post $post)
+    public function destroy($id)
     {
+        $post = Post::find($id);
+        if(!$post)
+            return $this->apiResponse('error', 'No Psot Found!', null, 404);
+        
         $post->delete();
         return $this->apiResponse('success', 'Post Deleted Successfully', null);
     }
