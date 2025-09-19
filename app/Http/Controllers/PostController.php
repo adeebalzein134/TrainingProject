@@ -1,19 +1,19 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\Post;
 use Illuminate\Http\Request;
+use App\Models\Post;
+use App\Traits\ApiResponse;
 
 class PostController extends Controller
 {
+    use ApiResponse;
+
     public function index()
     {
-        return response() -> json([
-            'status' => 'success',
-            'message' => 'All Posts Fetched Successfully',
-            'data' => Post::all()
-        ], 200);
+        $posts = Post::all();
+
+        return $this->apiResponse('success', 'All Posts', $posts);
     }
 
     public function store(Request $request)
@@ -22,23 +22,14 @@ class PostController extends Controller
             'title' => 'required|max:255',
             'body' => 'required'
         ]);
-    
-        $post = Post::create($validatedFields);
 
-        return response() -> json([
-            'status' => 'success',
-            'message' => 'Post Created Successfully',
-            'data' => $post
-        ], 201);
+        $post = Post::create($validatedFields);
+        return $this->apiResponse('success', 'Post Created Successfully', $post, 201);
     }
 
     public function show(Post $post)
     {
-        return response() -> json([
-            'status' => 'success',
-            'message' => 'This Is Post Number ' . $post['id'],
-            'data' => $post
-        ], 200);
+        return $this->apiResponse('success', 'This is Post Number ' .  $post['id'], $post);
     }
 
     public function update(Request $request, Post $post)
@@ -50,20 +41,12 @@ class PostController extends Controller
     
         $post->update($validatedFields);
 
-        return response() -> json([
-            'status' => 'success',
-            'message' => 'Post Updated',
-            'data' => $post
-        ], 200);
+        return $this->apiResponse('success', 'Post Updated', $post);
     }
 
     public function destroy(Post $post)
     {
         $post->delete();
-        return response() -> json([
-            'status' => 'success',
-            'message' => 'Post Deleted Successfully',
-            'data' => null
-        ], 200);
+        return $this->apiResponse('success', 'Post Deleted Successfully', null);
     }
 }
