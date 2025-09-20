@@ -6,6 +6,8 @@ use App\Models\Post;
 use App\Traits\ApiResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 
 class PostController extends Controller implements HasMiddleware
@@ -16,7 +18,7 @@ class PostController extends Controller implements HasMiddleware
         ];
     }
 
-    use ApiResponse;
+    use ApiResponse, AuthorizesRequests;
 
     public function index()
     {
@@ -52,7 +54,13 @@ class PostController extends Controller implements HasMiddleware
 
     public function update(Request $request, $id)
     {
+        
         $post = Post::find($id);
+
+        if ($request->user()->cannot('update', $post)) {
+            return $this->apiResponse('error', 'You do not have auth to edit this post!', null, 404);
+        }
+        
         if (!$post) {
             return $this->apiResponse('error', 'No Post Found!', null, 404);
         }
